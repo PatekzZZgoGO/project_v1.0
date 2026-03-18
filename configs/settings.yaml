@@ -1,0 +1,249 @@
+# configs/settings.yaml
+# 股票预测系统配置文件（YAML 格式）
+
+# ==================== 项目信息 ====================
+project:
+  name: "Stock Prediction System v1.0"
+  version: "1.0.0"
+  author: "Your Name"
+  description: "A 股预测系统 - 支持批量获取、本地缓存、增量更新"
+
+# ==================== 数据配置 ====================
+data:
+  # 数据源配置
+  source: "tushare"  # akshare / tushare / baostock / local
+  
+  # 市场配置
+  market: "CN"  # CN=A 股，US=美股，HK=港股
+  
+  # 缓存配置
+  cache_enabled: true
+  cache_dir: "./data/raw"
+  cache_format: "csv"  # csv / hdf5 / parquet
+  cache_compression: false  # 是否压缩存储
+  
+  # 目录结构
+  directories:
+    stocks: "./data/raw/stocks"      # 个股数据
+    indices: "./data/raw/indices"    # 指数数据
+    processed: "./data/processed"    # 处理后的数据
+    cache: "./data/cache"            # 临时缓存
+    logs: "./logs"                   # 日志目录
+    models: "./models"               # 模型目录
+    results: "./results"             # 结果目录
+  
+  # 股票列表配置
+  stock_list:
+    path: "./data/raw/stock_list.csv"
+    auto_refresh: true
+    refresh_interval_days: 7
+  
+  # 批量获取配置
+  batch_fetch:
+    enabled: true
+    start_date: "2020-01-01"
+    end_date: null  # null 表示今天
+    skip_existing: true  # 跳过已存在的股票
+    force_refresh: false
+    rate_limit_delay: 1.0  # 请求间隔（秒）- Tushare 建议 1 秒
+    max_workers: 1  # 并发数（建议 1，避免 API 限流）
+  
+  # 增量更新配置
+  auto_update:
+    enabled: true
+    update_time: "18:00"  # 每天更新时间
+    update_days: [1, 2, 3, 4, 5]  # 周一至周五
+    check_interval_hours: 24
+  
+  # 股票筛选配置
+  filter:
+    exclude_st: true        # 排除 ST 股票
+    exclude_new: true       # 排除新股（上市<1 年）
+    min_listing_days: 365   # 最小上市天数
+    min_market_cap: 0       # 最小市值（亿）
+    max_market_cap: null    # 最大市值（亿）
+    exclude_suspended: true # 排除停牌股票
+  
+  # 数据列配置
+  columns:
+    required:
+      - Open
+      - High
+      - Low
+      - Close
+      - Volume
+    optional:
+      - Turnover
+      - Amplitude
+      - PctChange
+  
+  # 数据质量检查
+  quality:
+    check_missing: true
+    max_missing_ratio: 0.1  # 最大缺失比例
+    check_duplicates: true
+    check_outliers: true
+
+# ==================== API 配置 ====================
+api:
+  # 重试配置
+  retry_count: 5
+  retry_delays: [5, 10, 30]  # 每次重试的等待时间（秒）
+  timeout: 30
+  
+  # 限流配置
+  rate_limit:
+    enabled: true
+    requests_per_minute: 60
+    requests_per_day: 5000
+  
+  # AKShare 配置
+  akshare:
+    adjust: "qfq"  # qfq=前复权，hfq=后复权，none=不复权
+    period: "daily"  # daily/weekly/monthly
+  
+  # Tushare 配置
+  tushare:
+    token: "9a662321574738aba1a21e9e049f2860a115f1372017259cea19d62b"
+    api_url: "http://api.tushare.pro"
+    min_points: 120  # daily 接口需要的最低积分
+
+# ==================== 模型配置 ====================
+model:
+  # LSTM 配置
+  lstm:
+    input_size: null  # null 表示自动根据特征数量设置
+    hidden_size: 64
+    num_layers: 2
+    dropout: 0.2
+    learning_rate: 0.001
+    batch_size: 32
+    epochs: 100
+    sequence_length: 60
+    validation_split: 0.2
+    early_stopping:
+      enabled: true
+      patience: 10
+      min_delta: 0.0001
+    save_best_only: true
+    model_path: "./models/best_lstm_model.pth"
+  
+  # 传统 ML 配置
+  traditional:
+    test_size: 0.2
+    random_state: 42
+    models:
+      - name: "RandomForest"
+        n_estimators: 100
+        max_depth: 10
+      - name: "XGBoost"
+        n_estimators: 100
+        max_depth: 6
+        learning_rate: 0.1
+      - name: "GradientBoosting"
+        n_estimators: 100
+        max_depth: 5
+  
+  # 特征工程配置
+  features:
+    technical_indicators:
+      - SMA_5
+      - SMA_10
+      - SMA_20
+      - EMA_12
+      - EMA_26
+      - RSI_14
+      - MACD
+      - Bollinger_Bands
+    lag_features: [1, 3, 5, 10]
+    rolling_windows: [5, 10, 20, 60]
+    target_horizon: 5  # 预测未来 N 天
+
+# ==================== 回测配置 ====================
+backtest:
+  # 资金配置
+  initial_capital: 1000000
+  currency: "CNY"
+  
+  # 交易成本
+  commission_rate: 0.0003  # 手续费率（万分之三）
+  slippage: 0.001          # 滑点（0.1%）
+  stamp_duty: 0.001        # 印花税（0.1%，仅卖出）
+  
+  # 仓位配置
+  position_limit: 0.1      # 单只股票最大仓位（10%）
+  min_position: 100        # 最小持仓股数
+  max_positions: 10        # 最大持仓股票数
+  
+  # 交易信号
+  signal:
+    threshold: 0.01        # 预测阈值（1%）
+    long_threshold: 0.01   # 做多阈值
+    short_threshold: -0.01 # 做空阈值
+    hold_days: 5           # 持仓天数
+  
+  # 风险控制
+  risk:
+    stop_loss: 0.05        # 止损线（5%）
+    take_profit: 0.10      # 止盈线（10%）
+    max_drawdown: 0.20     # 最大回撤（20%）
+  
+  # 结果保存
+  save_results: true
+  results_dir: "./results/backtest"
+  save_trades: true
+  save_portfolio_values: true
+
+# ==================== 日志配置 ====================
+logging:
+  level: "INFO"  # DEBUG / INFO / WARNING / ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  
+  # 日志文件
+  file:
+    enabled: true
+    path: "./logs"
+    filename: "stock_prediction.log"
+    max_size_mb: 10
+    backup_count: 5
+  
+  # 控制台输出
+  console:
+    enabled: true
+    colored: true
+
+# ==================== 可视化配置 ====================
+visualization:
+  # 图表配置
+  figure:
+    dpi: 300
+    figsize: [16, 12]
+    style: "seaborn-v0_8"
+  
+  # 字体配置
+  font:
+    sans_serif: ["SimHei", "Microsoft YaHei", "DejaVu Sans"]
+    unicode_minus: false
+  
+  # 保存配置
+  save:
+    enabled: true
+    format: "png"
+    directory: "./results/figures"
+
+# ==================== 运行配置 ====================
+run:
+  # 默认运行模式
+  mode: "train"  # train / predict / backtest / all
+  
+  # 设备配置
+  device: "cpu"  # cpu / cuda
+  
+  # 随机种子（保证可复现）
+  random_seed: 42
+  
+  # 并行配置
+  parallel:
+    enabled: false
+    n_jobs: -1  # -1 表示使用所有 CPU 核心

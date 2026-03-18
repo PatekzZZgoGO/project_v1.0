@@ -1,0 +1,18 @@
+# 数据获取
+pip install yfinance tushare akshare
+
+# 技术指标计算
+pip install ta-lib  # 或 pip install ta (纯Python替代)
+
+# 机器学习
+pip install scikit-learn xgboost lightgbm
+
+# 深度学习
+pip install torch torchvision torchaudio
+pip install tensorflow keras
+
+# 数据处理与可视化
+pip install pandas numpy matplotlib plotly seaborn
+
+# 回测框架
+pip install backtrader zipline

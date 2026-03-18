@@ -1,0 +1,62 @@
+# ============ Python ============
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# ============ 模型文件 ============
+models/*.pth
+models/*.pt
+models/*.h5
+
+# ============ 数据文件 ============
+# 忽略所有 CSV 文件（根目录和所有子目录）
+*.csv
+data/*.csv
+data/**/*.csv
+*.pkl
+data/*.pkl
+data/**/*.pkl
+
+# 其他数据格式
+*.parquet
+data/*.parquet
+*.json
+data/*.json
+*.xlsx
+data/*.xlsx
+*.tsv
+data/*.tsv
+*.feather
+data/*.pkl
+
+# ============ 日志 ============
+logs/*.log
+logs/*.txt
+*.log
+
+# ============ IDE ============
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# ============ 系统 ============
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ============ 临时文件 ============
+*.tmp
+*.temp
+~$*.doc*
+~$*.xls*
