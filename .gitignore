@@ -17,10 +17,10 @@ models/*.pt
 models/*.h5
 
 # ============ 数据文件 ============
-# 忽略所有 CSV 文件（根目录和所有子目录）
-*.csv
-data/*.csv
-data/**/*.csv
+results/
+data/raw/AAPL_*.csv
+data/raw/stock_list.csv
+
 *.pkl
 data/*.pkl
 data/**/*.pkl
